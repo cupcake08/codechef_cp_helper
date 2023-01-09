@@ -5,6 +5,7 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from datetime import datetime
+from colorama import Fore
 import argparse
 import os
 import stat
@@ -40,6 +41,7 @@ driver = webdriver.Firefox(options=firefox_options)
 
 # driver.get(URI)
 
+
 def login():
     css = 'm-login-button-no-border'
     e = driver.find_element(By.CLASS_NAME, css)
@@ -47,10 +49,10 @@ def login():
     inpt = driver.find_element(
         By.CSS_SELECTOR, '#ajax-login-form > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > input:nth-child(2)')
     # username
-    inpt.send_keys("cup_cake_07")
+    inpt.send_keys("")
     pswd = driver.find_element(By.CSS_SELECTOR, '.password-login')
     # password
-    pswd.send_keys("#xjh9bc%$AB")
+    pswd.send_keys("")
     hide = driver.find_element(By.CSS_SELECTOR, '.toggle-password-login')
     hide.click()
     sub = driver.find_element(By.XPATH, '//*[@id="ajax-login-form"]')
@@ -61,11 +63,16 @@ def login():
 
 driver.get(URI + args.contest)
 
-path = '/html/body/div[1]/div/main/section/div[2]/div/div/div[2]/div[2]/table'
-element = driver.find_element(By.XPATH, path)
-
-problems = element.find_element(
-    By.TAG_NAME, "tbody").find_elements(By.TAG_NAME, "tr")
+try:
+    path = '/html/body/div[1]/div/main/section/div[2]/div/div/div[2]/div[2]/table'
+    e = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.XPATH, path)))
+    element = driver.find_element(By.XPATH, path)
+    problems = element.find_element(
+        By.TAG_NAME, "tbody").find_elements(By.TAG_NAME, "tr")
+except:
+    driver.quit()
+    os.abort()
 
 p_links = []
 
@@ -95,6 +102,7 @@ def make_file(filename, pname):
 
 
 for idx, i in enumerate(p_links):
+    print(f"working on problem: {Fore.MAGENTA + i[0]}")
     folder = str(chr(ord('A') + idx))
     os.mkdir(folder, mode=stat.S_IRWXU)
     os.chdir(folder)
@@ -103,7 +111,7 @@ for idx, i in enumerate(p_links):
     driver.get(i[1])
     try:
         e = WebDriverWait(driver, 10).until(EC.presence_of_element_located(
-        (By.CSS_SELECTOR, '._values__container_10hzz_207')))
+            (By.CSS_SELECTOR, '._values__container_10hzz_207')))
     except:
         driver.quit()
 
